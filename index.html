@@ -1,669 +1,262 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JuDog</title>
+    <title>阿吱阿佐</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: all 1.5s ease;
         }
         
         body {
-            background: linear-gradient(135deg, #0c0c1d, #161632, #1d1d41);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Arial', sans-serif;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* 默认夜间模式 */
+            background-color: #0c0c0c;
         }
         
-        .container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* 日间模式 (6:00-18:00) */
+        body.daytime {
+            background-color: #f0f8ff;
+        }
+        
+        .avatar-container {
             position: relative;
+            width: 180px;
+            height: 180px;
+            margin-bottom: 35px;
         }
         
-        .image-container {
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
             position: relative;
-            max-width: 90vw;
-            max-height: 90vh;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            z-index: 2;
+            /* 外沿发光效果 - 夜间模式 */
+            box-shadow: 
+                0 0 0 3px rgba(255, 255, 255, 0.3),
+                0 0 15px 8px rgba(200, 230, 255, 0.6);
+            /* 16秒旋转一圈 */
+            animation: spin 16s linear infinite;
         }
         
-        .image-container img {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            display: block;
-            transition: all 0.5s ease;
-            object-fit: contain;
+        /* 日间头像发光效果 */
+        body.daytime .avatar {
+            box-shadow: 
+                0 0 0 3px rgba(0, 0, 0, 0.15),
+                0 0 15px 8px rgba(255, 215, 0, 0.4);
         }
         
-        /* 基础动画效果类 */
-        .spin {
-            animation: spin 1.8s ease-out;
+        .name {
+            font-size: 36px;
+            letter-spacing: 6px;
+            font-weight: 500;
+            /* 夜间文字颜色 */
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
         }
         
-        .zoom {
-            animation: zoom 1.5s ease-in-out;
+        /* 日间文字颜色 */
+        body.daytime .name {
+            color: #2c3e50;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
         
-        .shake {
-            animation: shake 1s ease;
-        }
-        
-        .flip {
-            animation: flip 1.4s ease;
-        }
-        
-        .glow {
-            animation: glow 1.8s ease-in-out;
-        }
-        
-        .wave {
-            animation: wave 2s ease-in-out;
-        }
-        
-        .swing {
-            animation: swing 1.6s ease;
-        }
-        
-        .bounce {
-            animation: bounce 1.3s ease;
-        }
-        
-        .pulse {
-            animation: pulse 1.7s ease-in-out infinite;
-        }
-        
-        .rotate3d {
-            animation: rotate3d 2.2s ease;
-        }
-        
-        .float {
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        .twist {
-            animation: twist 2s ease;
-        }
-        
-        /* 新增高级效果 */
-        .shatter {
-            animation: shatter 1.5s ease-out forwards;
-        }
-        
-        .explode {
-            animation: explode 1.2s ease-out forwards;
-        }
-        
-        .fade-out {
-            animation: fadeOut 1.8s ease-in forwards;
-        }
-        
-        .pixelate {
-            animation: pixelate 2s linear forwards;
-        }
-        
-        .melt {
-            animation: melt 2s ease-out forwards;
-        }
-        
-        /* 关键帧动画定义 */
         @keyframes spin {
-            0% { transform: rotate(0); }
+            0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
-        @keyframes zoom {
-            0% { transform: scale(0.4); opacity: 0; }
-            70% { transform: scale(1.08); }
-            100% { transform: scale(1); opacity: 1; }
+        /* 背景装饰 */
+        .bg-element {
+            position: absolute;
+            border-radius: 50%;
+            z-index: -1;
         }
         
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-20px); }
-            40%, 80% { transform: translateX(20px); }
+        /* 夜间背景元素 */
+        .bg-element:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 15%;
+            background: radial-gradient(circle, rgba(100, 150, 255, 0.1) 0%, transparent 70%);
         }
         
-        @keyframes flip {
-            0% { transform: perspective(1000px) rotateY(0); }
-            50% { transform: perspective(1000px) rotateY(180deg); }
-            100% { transform: perspective(1000px) rotateY(360deg); }
+        .bg-element:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: 25%;
+            right: 15%;
+            background: radial-gradient(circle, rgba(150, 200, 255, 0.1) 0%, transparent 70%);
         }
         
-        @keyframes glow {
-            0%, 100% { 
-                filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 12px #ff00de);
-            }
-            50% { 
-                filter: drop-shadow(0 0 25px #fff) drop-shadow(0 0 35px #ff00de) drop-shadow(0 0 45px #ff00de);
-            }
+        /* 日间背景元素 */
+        body.daytime .bg-element:nth-child(1) {
+            background: radial-gradient(circle, rgba(100, 180, 255, 0.1) 0%, transparent 70%);
         }
         
-        @keyframes wave {
-            0% { transform: translateY(0); }
-            25% { transform: translateY(-20px); }
-            50% { transform: translateY(0); }
-            75% { transform: translateY(-12px); }
-            100% { transform: translateY(0); }
+        body.daytime .bg-element:nth-child(2) {
+            background: radial-gradient(circle, rgba(255, 200, 100, 0.1) 0%, transparent 70%);
         }
         
-        @keyframes swing {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(18deg); }
-            50% { transform: rotate(-12deg); }
-            75% { transform: rotate(8deg); }
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-40px); }
-            60% { transform: translateY(-20px); }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.06); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes rotate3d {
-            0% { transform: rotate3d(0, 0, 0, 0deg); }
-            100% { transform: rotate3d(1, 1, 0, 360deg); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        
-        @keyframes twist {
-            0% { transform: rotate(0) scale(1); }
-            50% { transform: rotate(90deg) scale(1.2); }
-            100% { transform: rotate(0) scale(1); }
-        }
-        
-        /* 新增高级效果关键帧 */
-        @keyframes shatter {
-            0% { 
-                transform: scale(1);
-                filter: brightness(1) blur(0);
-                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            }
-            50% {
-                filter: brightness(1.5) blur(2px);
-            }
-            100% { 
-                transform: scale(1.2);
-                filter: brightness(0) blur(10px);
-                clip-path: polygon(
-                    0 0, 10% 15%, 25% 5%, 40% 20%, 55% 0, 
-                    70% 15%, 85% 5%, 100% 0, 
-                    95% 35%, 100% 50%, 
-                    95% 65%, 100% 100%, 
-                    65% 95%, 50% 100%, 
-                    35% 95%, 0 100%, 
-                    5% 65%, 0 50%, 
-                    5% 35%
-                );
-                opacity: 0;
-            }
-        }
-        
-        @keyframes explode {
-            0% { 
-                transform: scale(1);
-                filter: brightness(1);
-            }
-            20% {
-                filter: brightness(3);
-            }
-            100% { 
-                transform: scale(3);
-                filter: brightness(0) blur(20px);
-                opacity: 0;
-            }
-        }
-        
-        @keyframes fadeOut {
-            0% { 
-                opacity: 1;
-                filter: blur(0);
-            }
-            100% { 
-                opacity: 0;
-                filter: blur(10px);
-            }
-        }
-        
-        @keyframes pixelate {
-            0% { 
-                filter: contrast(100%) blur(0);
-            }
-            50% {
-                filter: contrast(50%) blur(0.5px);
-            }
-            100% { 
-                filter: contrast(10%) blur(1px);
-                opacity: 0;
-            }
-        }
-        
-        @keyframes melt {
-            0% { 
-                transform: scaleY(1);
-                filter: blur(0);
-                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            }
-            100% { 
-                transform: scaleY(0.1) translateY(200px);
-                filter: blur(5px);
-                clip-path: polygon(
-                    0 0, 100% 0, 
-                    95% 10%, 85% 15%, 
-                    75% 20%, 65% 25%, 
-                    55% 30%, 45% 35%, 
-                    35% 40%, 25% 45%, 
-                    15% 50%, 5% 55%, 
-                    0 60%
-                );
-                opacity: 0;
-            }
-        }
-        
-        /* 碎玻璃碎片效果 */
-        .glass-fragments {
+        /* 夜间星空效果 */
+        .stars {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 10;
+            z-index: -1;
+            opacity: 0.8;
         }
         
-        .fragment {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transform-origin: center;
+        body.daytime .stars {
             opacity: 0;
         }
         
-        /* 爆炸粒子效果 */
-        .explosion-particles {
+        .star {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
         }
         
-        .particle {
+        /* 昼夜转换按钮 */
+        .theme-toggle {
             position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
-            opacity: 0.7;
-        }
-        
-        .effect-indicator {
-            position: absolute;
-            bottom: 5vh;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(5px);
-            box-shadow: 0 0 15px rgba(255, 105, 180, 0.7);
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 13px;
+            cursor: pointer;
             display: flex;
-            justify-content: center;
             align-items: center;
+            padding: 0 3px;
+            transition: background 0.5s ease;
         }
         
-        .inner-dot {
-            width: 12px;
-            height: 12px;
+        body.daytime .theme-toggle {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .toggle-circle {
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #ff0080, #ff8c00);
-            animation: pulse 1.5s infinite;
+            background: #ffd700;
+            transition: transform 0.5s ease;
         }
         
-        .visual-counter {
-            position: absolute;
-            top: 5vh;
-            right: 5vw;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0;
-        }
-        
-        .counter-fill {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(#ff00cc, #ff9900, #ff00cc);
-            clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
-            animation: rotate 10s linear infinite;
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        @media (max-width: 768px) {
-            .image-container {
-                max-width: 95vw;
-                max-height: 95vh;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .effect-indicator {
-                width: 25px;
-                height: 25px;
-                bottom: 3vh;
-            }
-            
-            .inner-dot {
-                width: 10px;
-                height: 10px;
-            }
+        body.daytime .toggle-circle {
+            transform: translateX(24px);
+            background: #2c3e50;
         }
     </style>
 </head>
 <body>
-    <div class="background-elements" id="particles"></div>
+    <!-- 背景元素 -->
+    <div class="bg-element"></div>
+    <div class="bg-element"></div>
     
-    <div class="container">
-        <div class="visual-counter">
-            <div class="counter-fill"></div>
-        </div>
-        
-        <div class="image-container" id="imageContainer">
-            <img src="https://s21.ax1x.com/2024/11/29/pA58nwn.jpg" alt="JuDog视觉动画" id="animatedImage">
-        </div>
-        
-        <div id="glassFragments" class="glass-fragments"></div>
-        <div id="explosionParticles" class="explosion-particles"></div>
-        
-        <div class="effect-indicator">
-            <div class="inner-dot"></div>
-        </div>
+    <!-- 星空背景 -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- 昼夜切换按钮 -->
+    <div class="theme-toggle" id="themeToggle">
+        <div class="toggle-circle"></div>
     </div>
+    
+    <div class="avatar-container">
+        <img src="https://s21.ax1x.com/2024/11/29/pA58nwn.jpg" alt="阿吱阿佐的头像" class="avatar">
+    </div>
+    
+    <div class="name">阿吱阿佐</div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const imageContainer = document.getElementById('imageContainer');
-            const animatedImage = document.getElementById('animatedImage');
-            const particlesContainer = document.getElementById('particles');
-            const glassFragments = document.getElementById('glassFragments');
-            const explosionParticles = document.getElementById('explosionParticles');
+        // 创建星空背景
+        function createStars() {
+            const stars = document.getElementById('stars');
+            const starCount = 150;
             
-            // 定义所有可用的效果
-            const effects = [
-                {name: "spin", duration: 1800},
-                {name: "zoom", duration: 1500},
-                {name: "shake", duration: 1000},
-                {name: "flip", duration: 1400},
-                {name: "glow", duration: 1800},
-                {name: "wave", duration: 2000},
-                {name: "swing", duration: 1600},
-                {name: "bounce", duration: 1300},
-                {name: "pulse", duration: 1700},
-                {name: "rotate3d", duration: 2200},
-                {name: "float", duration: 3000},
-                {name: "twist", duration: 2000},
-                {name: "shatter", duration: 1500, special: createShatterEffect},
-                {name: "explode", duration: 1200, special: createExplosionEffect},
-                {name: "fade-out", duration: 1800},
-                {name: "pixelate", duration: 2000},
-                {name: "melt", duration: 2000}
-            ];
-            
-            // 当前效果索引
-            let currentEffectIndex = 0;
-            
-            // 创建背景粒子
-            function createParticles() {
-                const particleCount = 15;
-                for(let i = 0; i < particleCount; i++) {
-                    const particle = document.createElement('div');
-                    particle.classList.add('particle');
-                    
-                    const size = Math.random() * 150 + 50;
-                    particle.style.width = `${size}px`;
-                    particle.style.height = `${size}px`;
-                    
-                    const posX = Math.random() * 100;
-                    const posY = Math.random() * 100;
-                    particle.style.left = `${posX}%`;
-                    particle.style.top = `${posY}%`;
-                    
-                    const animationDuration = Math.random() * 30 + 20;
-                    particle.style.animation = `float ${animationDuration}s infinite ease-in-out`;
-                    
-                    particlesContainer.appendChild(particle);
-                }
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // 随机位置和大小
+                const size = Math.random() * 3;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // 随机闪烁动画
+                const duration = 1 + Math.random() * 4;
+                star.style.animation = `twinkle ${duration}s infinite alternate`;
+                
+                stars.appendChild(star);
             }
-            
-            // 创建碎玻璃效果
-            function createShatterEffect() {
-                glassFragments.innerHTML = '';
-                const fragmentCount = 30;
-                const containerRect = imageContainer.getBoundingClientRect();
-                
-                for(let i = 0; i < fragmentCount; i++) {
-                    const fragment = document.createElement('div');
-                    fragment.classList.add('fragment');
-                    
-                    // 随机大小和位置
-                    const size = Math.random() * 30 + 10;
-                    fragment.style.width = `${size}px`;
-                    fragment.style.height = `${size}px`;
-                    
-                    const posX = Math.random() * containerRect.width;
-                    const posY = Math.random() * containerRect.height;
-                    fragment.style.left = `${posX}px`;
-                    fragment.style.top = `${posY}px`;
-                    
-                    // 随机旋转和动画
-                    const rotation = Math.random() * 360;
-                    const delay = Math.random() * 0.5;
-                    const duration = 0.5 + Math.random() * 1;
-                    const distance = 50 + Math.random() * 100;
-                    const angle = Math.random() * Math.PI * 2;
-                    
-                    fragment.style.transform = `rotate(${rotation}deg)`;
-                    fragment.style.animation = `
-                        fragmentFall ${duration}s ease-out ${delay}s forwards,
-                        fragmentFade ${duration}s ease-out ${delay}s forwards
-                    `;
-                    
-                    // 动态添加关键帧
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        @keyframes fragmentFall {
-                            0% {
-                                transform: rotate(${rotation}deg) translate(0, 0);
-                                opacity: 1;
-                            }
-                            100% {
-                                transform: rotate(${rotation + 180}deg) 
-                                           translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px);
-                                opacity: 0;
-                            }
-                        }
-                        
-                        @keyframes fragmentFade {
-                            0% { opacity: 1; }
-                            100% { opacity: 0; }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                    
-                    glassFragments.appendChild(fragment);
-                }
+        }
+        
+        // 添加闪烁动画
+        document.styleSheets[0].insertRule(
+            `@keyframes twinkle {
+                0% { opacity: 0.3; }
+                100% { opacity: 0.9; }
+            }`, 
+            document.styleSheets[0].cssRules.length
+        );
+        
+        // 检查当前是否为日间 (6:00-18:00)
+        function isDaytime() {
+            const now = new Date();
+            const hours = now.getHours();
+            return hours >= 6 && hours < 18;
+        }
+        
+        // 切换主题
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('daytime')) {
+                body.classList.remove('daytime');
+            } else {
+                body.classList.add('daytime');
             }
-            
-            // 创建爆炸粒子效果
-            function createExplosionEffect() {
-                explosionParticles.innerHTML = '';
-                const particleCount = 50;
-                const containerRect = imageContainer.getBoundingClientRect();
-                const centerX = containerRect.width / 2;
-                const centerY = containerRect.height / 2;
-                
-                for(let i = 0; i < particleCount; i++) {
-                    const particle = document.createElement('div');
-                    particle.classList.add('particle');
-                    
-                    // 随机大小和颜色
-                    const size = Math.random() * 15 + 5;
-                    particle.style.width = `${size}px`;
-                    particle.style.height = `${size}px`;
-                    
-                    const hue = Math.random() * 60 + 10; // 暖色调范围
-                    particle.style.background = `radial-gradient(circle, hsla(${hue}, 100%, 70%, 0.8) 0%, hsla(${hue}, 100%, 50%, 0) 70%)`;
-                    
-                    // 初始位置在中心
-                    particle.style.left = `${centerX}px`;
-                    particle.style.top = `${centerY}px`;
-                    
-                    // 随机动画参数
-                    const angle = Math.random() * Math.PI * 2;
-                    const distance = 50 + Math.random() * 150;
-                    const duration = 0.5 + Math.random() * 0.5;
-                    const delay = Math.random() * 0.3;
-                    
-                    // 设置动画
-                    particle.style.animation = `
-                        particleExplode ${duration}s ease-out ${delay}s forwards,
-                        particleFade ${duration}s ease-out ${delay}s forwards
-                    `;
-                    
-                    // 动态添加关键帧
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        @keyframes particleExplode {
-                            0% {
-                                transform: translate(0, 0) scale(1);
-                            }
-                            100% {
-                                transform: translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0.1);
-                            }
-                        }
-                        
-                        @keyframes particleFade {
-                            0% { opacity: 1; }
-                            100% { opacity: 0; }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                    
-                    explosionParticles.appendChild(particle);
-                }
+        }
+        
+        // 更新主题
+        function updateTheme() {
+            const body = document.body;
+            if (isDaytime()) {
+                body.classList.add('daytime');
+            } else {
+                body.classList.remove('daytime');
             }
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            updateTheme();
             
-            // 应用动画效果
-            function applyEffect(index) {
-                // 移除所有动画类
-                effects.forEach(effect => {
-                    animatedImage.classList.remove(effect.name);
-                });
-                
-                // 清除特殊效果
-                glassFragments.innerHTML = '';
-                explosionParticles.innerHTML = '';
-                
-                // 添加新的动画类
-                const effect = effects[index];
-                animatedImage.classList.add(effect.name);
-                
-                // 执行特殊效果
-                if (effect.special) {
-                    effect.special();
-                }
-                
-                // 重置动画
-                void animatedImage.offsetWidth;
-                
-                // 更新当前索引
-                currentEffectIndex = index;
-            }
+            // 添加切换按钮事件
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
             
-            // 图片点击事件 - 循环切换效果
-            imageContainer.addEventListener('click', function() {
-                const nextIndex = (currentEffectIndex + 1) % effects.length;
-                applyEffect(nextIndex);
-            });
-            
-            // 设置初始效果
-            applyEffect(0);
-            createParticles();
-            
-            // 添加键盘支持
-            document.addEventListener('keydown', function(e) {
-                if (e.key === ' ' || e.key === 'ArrowRight') {
-                    const nextIndex = (currentEffectIndex + 1) % effects.length;
-                    applyEffect(nextIndex);
-                } else if (e.key === 'ArrowLeft') {
-                    const prevIndex = (currentEffectIndex - 1 + effects.length) % effects.length;
-                    applyEffect(prevIndex);
-                }
-            });
-            
-            // 添加触摸滑动支持
-            let touchStartX = 0;
-            imageContainer.addEventListener('touchstart', function(e) {
-                touchStartX = e.touches[0].clientX;
-            });
-            
-            imageContainer.addEventListener('touchend', function(e) {
-                const touchEndX = e.changedTouches[0].clientX;
-                const diffX = touchStartX - touchEndX;
-                
-                if (Math.abs(diffX) > 50) {
-                    if (diffX > 0) {
-                        // 向左滑动 - 下一个效果
-                        const nextIndex = (currentEffectIndex + 1) % effects.length;
-                        applyEffect(nextIndex);
-                    } else {
-                        // 向右滑动 - 上一个效果
-                        const prevIndex = (currentEffectIndex - 1 + effects.length) % effects.length;
-                        applyEffect(prevIndex);
-                    }
-                }
-            });
+            // 每分钟检查一次时间变化
+            setInterval(updateTheme, 60000);
         });
     </script>
 </body>
