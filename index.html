@@ -20,11 +20,9 @@
             min-height: 100vh;
             font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
             overflow: hidden;
-            /* 默认夜间模式 */
             background: radial-gradient(circle at center, #0c0c0c, #000);
         }
         
-        /* 日间模式 (6:00-18:00) */
         body.daytime {
             background: radial-gradient(circle at center, #f0f9ff, #c2e9fb);
         }
@@ -43,64 +41,68 @@
             object-fit: cover;
             position: relative;
             z-index: 2;
-            /* 外沿发光效果 - 夜间模式 */
-            box-shadow: 
-                0 0 0 3px rgba(100, 150, 255, 0.3),
-                0 0 20px 10px rgba(100, 150, 255, 0.5);
-            /* 16秒旋转一圈 */
+            box-shadow: 0 0 0 3px rgba(100, 150, 255, .3), 0 0 20px 10px rgba(100, 150, 255, .5);
             animation: spin 16s linear infinite;
+            cursor: pointer;
         }
         
-        /* 日间头像发光效果 */
+        .avatar.paused {
+            animation-play-state: paused;
+        }
+        
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+        
         body.daytime .avatar {
-            box-shadow: 
-                0 0 0 3px rgba(255, 200, 50, 0.3),
-                0 0 20px 10px rgba(255, 200, 50, 0.4);
+            box-shadow: 0 0 0 3px rgba(255, 200, 50, .3), 0 0 20px 10px rgba(255, 200, 50, .4);
         }
         
         .name {
             font-size: 42px;
             letter-spacing: 8px;
             font-weight: 500;
-            /* 夜间文字颜色 */
-            color: #ffffff;
-            text-shadow: 0 0 15px rgba(100, 150, 255, 0.8);
+            color: #fff;
+            text-shadow: 0 0 15px rgba(100, 150, 255, .8);
             opacity: 1;
-            transition: opacity 2s ease-in-out;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            cursor: pointer;
+            text-align: center;
+            padding: 0 20px;
         }
         
-        /* 日间文字颜色 */
+        .name:hover {
+            transform: scale(1.03);
+        }
+        
         body.daytime .name {
             color: #2c3e50;
-            text-shadow: 0 0 15px rgba(255, 200, 50, 0.5);
+            text-shadow: 0 0 15px rgba(255, 200, 50, .5);
         }
         
-        /* 文字消失动画 */
         .name.hidden {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(10px);
             pointer-events: none;
         }
         
         @keyframes spin {
-            0% { transform: rotate(0deg); }
+            0% { transform: rotate(0); }
             100% { transform: rotate(360deg); }
         }
         
-        /* 背景装饰 */
         .bg-element {
             position: absolute;
             border-radius: 50%;
             z-index: -1;
         }
         
-        /* 夜间背景元素 */
         .bg-element:nth-child(1) {
             width: 350px;
             height: 350px;
             top: 10%;
             left: 10%;
-            background: radial-gradient(circle, rgba(100, 150, 255, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(100, 150, 255, .1) 0, transparent 70%);
             animation: float 15s infinite alternate ease-in-out;
         }
         
@@ -109,98 +111,190 @@
             height: 250px;
             bottom: 15%;
             right: 15%;
-            background: radial-gradient(circle, rgba(150, 100, 255, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(150, 100, 255, .1) 0, transparent 70%);
             animation: float 12s infinite alternate-reverse ease-in-out;
         }
         
-        /* 日间背景元素 */
         body.daytime .bg-element:nth-child(1) {
-            background: radial-gradient(circle, rgba(100, 200, 255, 0.2) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(100, 200, 255, .2) 0, transparent 70%);
         }
         
         body.daytime .bg-element:nth-child(2) {
-            background: radial-gradient(circle, rgba(255, 200, 100, 0.2) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 200, 100, .2) 0, transparent 70%);
         }
         
-        /* 动画效果 */
         @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); }
+            0% { transform: translateY(0) rotate(0); }
             100% { transform: translateY(-30px) rotate(5deg); }
         }
         
-        /* 倒计时提示 */
-        .countdown {
-            position: absolute;
-            bottom: 30px;
-            color: white;
-            font-size: 14px;
-            opacity: 0.6;
-            transition: opacity 0.5s;
+        /* 音乐播放器样式 */
+        .music-player {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
         }
         
-        body.daytime .countdown {
+        body.daytime .music-player {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .music-control {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(100, 150, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .music-control:hover {
+            background: rgba(100, 150, 255, 0.5);
+            transform: scale(1.08);
+        }
+        
+        body.daytime .music-control {
+            background: rgba(255, 200, 50, 0.3);
+        }
+        
+        body.daytime .music-control:hover {
+            background: rgba(255, 200, 50, 0.5);
+        }
+        
+        .music-info {
+            color: white;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 120px;
+        }
+        
+        body.daytime .music-info {
             color: #2c3e50;
         }
         
-        .countdown.hidden {
-            opacity: 0;
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .name {
+                font-size: 32px;
+                letter-spacing: 5px;
+            }
+            
+            .avatar-container {
+                width: 160px;
+                height: 160px;
+                margin-bottom: 25px;
+            }
+            
+            .music-player {
+                bottom: 15px;
+                padding: 8px 15px;
+                gap: 10px;
+            }
+            
+            .music-info {
+                min-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- 背景元素 -->
     <div class="bg-element"></div>
     <div class="bg-element"></div>
     
-    <!-- 主内容 -->
+    <!-- 音乐播放器 -->
+    <div class="music-player" id="musicPlayer">
+        <div class="music-control" id="playBtn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 3L12 8L4 13V3Z" fill="currentColor"/>
+            </svg>
+        </div>
+        <div class="music-info" id="musicInfo">芊芊龍 - 期待夏天</div>
+    </div>
+    
     <div class="avatar-container">
-        <img src="https://s21.ax1x.com/2024/11/29/pA58nwn.jpg" alt="阿吱阿佐的头像" class="avatar">
+        <img src="https://s21.ax1x.com/2024/11/29/pA58nwn.jpg" alt="阿吱阿佐的头像" class="avatar" id="avatar">
     </div>
     
     <div class="name" id="name">阿吱阿佐</div>
-    
-    <div class="countdown" id="countdown">文字将在10秒后消失...</div>
 
     <script>
-        // 检查当前是否为日间 (6:00-18:00)
+        // 昼夜模式检测
         function isDaytime() {
-            const now = new Date();
-            const hours = now.getHours();
-            return hours >= 6 && hours < 18;
+            const h = new Date().getHours();
+            return h >= 6 && h < 18;
         }
         
-        // 更新主题
-        function updateTheme() {
-            const body = document.body;
-            if (isDaytime()) {
-                body.classList.add('daytime');
-            } else {
-                body.classList.remove('daytime');
-            }
-        }
-        
-        // 初始化
+        // 初始化页面
         document.addEventListener('DOMContentLoaded', () => {
-            updateTheme();
+            if (isDaytime()) document.body.classList.add('daytime');
             
             const nameElement = document.getElementById('name');
-            const countdownElement = document.getElementById('countdown');
+            const avatar = document.getElementById('avatar');
+            const playBtn = document.getElementById('playBtn');
+            const musicInfo = document.getElementById('musicInfo');
             
-            // 文字消失倒计时
-            let seconds = 10;
-            const countdownInterval = setInterval(() => {
-                seconds--;
-                if (seconds <= 0) {
-                    clearInterval(countdownInterval);
-                    nameElement.classList.add('hidden');
-                    countdownElement.textContent = "文字已隐藏，刷新页面可恢复";
-                    setTimeout(() => {
-                        countdownElement.classList.add('hidden');
-                    }, 3000);
-                } else {
-                    countdownElement.textContent = `文字将在${seconds}秒后消失...`;
+            // 音乐播放器功能
+            let audio = null;
+            let isPlaying = false;
+            const musicUrl = "https://music.163.com/song/media/outer/url?id=2740145320.mp3";
+            const musicTitle = "芊芊龍 - 期待夏天";
+            
+            // 设置初始音乐信息
+            musicInfo.textContent = musicTitle;
+            
+            // 初始化音乐播放器
+            playBtn.addEventListener('click', async () => {
+                if (!audio) {
+                    audio = new Audio(musicUrl);
+                    audio.addEventListener('ended', () => {
+                        audio.currentTime = 0;
+                        audio.play();
+                    });
                 }
-            }, 1000);
+                
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                    avatar.classList.add('paused');
+                    playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 3L12 8L4 13V3Z" fill="currentColor"/></svg>';
+                    musicInfo.textContent = musicTitle + " (已暂停)";
+                } else {
+                    try {
+                        await audio.play();
+                        isPlaying = true;
+                        avatar.classList.remove('paused');
+                        playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 3H7V13H5V3ZM9 3H11V13H9V3Z" fill="currentColor"/></svg>';
+                        musicInfo.textContent = musicTitle + " (播放中)";
+                    } catch (err) {
+                        console.error('播放失败:', err);
+                        musicInfo.textContent = "播放失败，请点击重试";
+                    }
+                }
+            });
+            
+            // 文字点击消失/恢复功能
+            nameElement.addEventListener('click', () => {
+                nameElement.classList.toggle('hidden');
+            });
+            
+            // 头像点击恢复文字显示
+            avatar.addEventListener('click', () => {
+                nameElement.classList.remove('hidden');
+            });
         });
     </script>
 </body>
