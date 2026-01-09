@@ -21,10 +21,82 @@
             font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
             overflow: hidden;
             background: radial-gradient(circle at center, #0c0c0c, #000);
+            position: relative;
         }
         
         body.daytime {
             background: radial-gradient(circle at center, #f0f9ff, #c2e9fb);
+        }
+        
+        /* 昼夜切换按钮 - 响应式设计 */
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: clamp(40px, 10vw, 50px);
+            height: clamp(40px, 10vw, 50px);
+            border-radius: 50%;
+            background: rgba(100, 150, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            border: none;
+            outline: none;
+        }
+        
+        body.daytime .mode-toggle {
+            background: rgba(255, 200, 50, 0.3);
+        }
+        
+        .mode-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        .mode-icon {
+            width: clamp(20px, 6vw, 24px);
+            height: clamp(20px, 6vw, 24px);
+            fill: white;
+        }
+        
+        body.daytime .mode-icon {
+            fill: #2c3e50;
+        }
+        
+        /* 日光/月光效果 */
+        .light-effect {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            z-index: -1;
+            transition: all 1.5s ease;
+        }
+        
+        .sun {
+            background: radial-gradient(circle, #fff8b0, #ffcc00);
+            top: 20%;
+            left: 10%;
+            transform: scale(0);
+        }
+        
+        .moon {
+            background: radial-gradient(circle, #e0e9ff, #a0b0ff);
+            top: 20%;
+            right: 10%;
+            transform: scale(0);
+        }
+        
+        body.daytime .sun {
+            transform: scale(1);
+        }
+        
+        body:not(.daytime) .moon {
+            transform: scale(1);
         }
         
         .avatar-container {
@@ -189,13 +261,13 @@
         /* 响应式调整 */
         @media (max-width: 768px) {
             .name {
-                font-size: 32px;
+                font-size: clamp(24px, 8vw, 32px);
                 letter-spacing: 5px;
             }
             
             .avatar-container {
-                width: 160px;
-                height: 160px;
+                width: clamp(120px, 40vw, 160px);
+                height: clamp(120px, 40vw, 160px);
                 margin-bottom: 25px;
             }
             
@@ -205,8 +277,34 @@
                 gap: 10px;
             }
             
-            .music-info {
-                min-width: 100px;
+            .light-effect {
+                width: 200px;
+                height: 200px;
+                filter: blur(40px);
+            }
+            
+            .mode-toggle {
+                top: 15px;
+                right: 15px;
+                width: clamp(36px, 9vw, 40px);
+                height: clamp(36px, 9vw, 40px);
+            }
+            
+            .mode-icon {
+                width: clamp(18px, 5vw, 20px);
+                height: clamp(18px, 5vw, 20px);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mode-toggle {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .mode-icon {
+                width: 18px;
+                height: 18px;
             }
         }
     </style>
@@ -215,7 +313,23 @@
     <div class="bg-element"></div>
     <div class="bg-element"></div>
     
-    <!-- 音乐播放器 -->
+    <!-- 昼夜切换按钮 -->
+    <button class="mode-toggle" id="modeToggle">
+        <svg class="mode-icon" viewBox="0 0 24 24">
+            <path id="modeIconPath" d="M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36c-0.98,1.37-2.58,2.26-4.4,2.26 c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/>
+        </svg>
+    </button>
+    
+    <!-- 日光/月光效果 -->
+    <div class="light-effect sun"></div>
+    <div class="light-effect moon"></div>
+    
+    <div class="avatar-container">
+        <img src="https://s21.ax1x.com/2024/11/29/pA58nwn.jpg" alt="阿吱阿佐的头像" class="avatar" id="avatar">
+    </div>
+    
+    <div class="name" id="name">阿吱阿佐</div>
+    
     <div class="music-player" id="musicPlayer">
         <div class="music-control" id="playBtn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -224,12 +338,6 @@
         </div>
         <div class="music-info" id="musicInfo">芊芊龍 - 期待夏天</div>
     </div>
-    
-    <div class="avatar-container">
-        <img src="https://s21.ax1x.com/2024/11/29/pA58nwn.jpg" alt="阿吱阿佐的头像" class="avatar" id="avatar">
-    </div>
-    
-    <div class="name" id="name">阿吱阿佐</div>
 
     <script>
         // 昼夜模式检测
@@ -246,6 +354,26 @@
             const avatar = document.getElementById('avatar');
             const playBtn = document.getElementById('playBtn');
             const musicInfo = document.getElementById('musicInfo');
+            const modeToggle = document.getElementById('modeToggle');
+            const modeIconPath = document.getElementById('modeIconPath');
+            
+            // 昼夜模式切换
+            modeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('daytime');
+                updateModeIcon();
+            });
+            
+            // 更新模式图标
+            function updateModeIcon() {
+                const isDay = document.body.classList.contains('daytime');
+                modeIconPath.setAttribute('d', isDay ? 
+                    'M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M12,2L12,2 C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10c0-0.46-0.04-0.92-0.1-1.36c-0.98,1.37-2.58,2.26-4.4,2.26 c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,2.04,12.46,2,12,2L12,2z' : 
+                    'M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36c-0.98,1.37-2.58,2.26-4.4,2.26 c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z'
+                );
+            }
+            
+            // 初始化图标
+            updateModeIcon();
             
             // 音乐播放器功能
             let audio = null;
@@ -299,3 +427,4 @@
     </script>
 </body>
 </html>
+
